@@ -65,7 +65,7 @@ func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, erro
 	ps.logger.Debugw("calling metrics endpoint", "endpoint", ps.endpoint)
 	resp, err := ps.httpClient.Get(ps.endpoint)
 	if err != nil {
-		return nil, fmt.Errorf("error making HTTP request to: %s", err)
+		return nil, fmt.Errorf("error making HTTP request to: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
@@ -83,7 +83,7 @@ func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, erro
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return nil, fmt.Errorf("error getting processing metrics for %s: %s",
+			return nil, fmt.Errorf("error getting processing metrics for %s: %w",
 				ps.endpoint, err)
 		}
 		ps.logger.Debugw("reading metric family", "name", metric.GetName())

@@ -61,7 +61,7 @@ type CertificateMonitor struct {
 func (cm *CertificateMonitor) CheckCertificates() error {
 	certInfos, err := cm.certificateInfoGatherer.GatherCertificateInfos()
 	if err != nil {
-		return fmt.Errorf("failed to gather certificate information: %s", err)
+		return fmt.Errorf("failed to gather certificate information: %w", err)
 	}
 
 	size := len(certInfos)
