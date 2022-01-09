@@ -15,25 +15,25 @@ type LogNotifer struct {
 func (l *LogNotifer) Send(alert Alert) error {
 	switch alert.Level {
 	case Info:
-		l.logger.Info("processing notification",
+		l.logger.Infow("processing notification",
 			"message", alert.Message,
 			"object", alert.ObjectRef,
 			"when", alert.When,
 			"source", alert.Source)
 	case Warn:
-		l.logger.Warn("processing notification",
+		l.logger.Warnw("processing notification",
 			"message", alert.Message,
 			"object", alert.ObjectRef,
 			"when", alert.When,
 			"source", alert.Source)
 	case Error:
-		l.logger.Error("processing notification",
+		l.logger.Errorw("processing notification",
 			"message", alert.Message,
 			"object", alert.ObjectRef,
 			"when", alert.When,
 			"source", alert.Source)
 	default:
-		l.logger.Warn("processing notification with unexpected level",
+		l.logger.Warnw("processing notification with unexpected level",
 			"message", alert.Message,
 			"object", alert.ObjectRef,
 			"when", alert.When,

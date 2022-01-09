@@ -65,7 +65,7 @@ func (cm *CertificateMonitor) CheckCertificates() error {
 	}
 
 	size := len(certInfos)
-	cm.logger.Info("verifying certificates", "size", size)
+	cm.logger.Infow("verifying certificates", "size", size)
 	var alerts []alert.Alert
 	for _, cert := range certInfos {
 		now := cm.clock.Now()
@@ -95,7 +95,7 @@ func (cm *CertificateMonitor) CheckCertificates() error {
 		}
 	}
 	if len(alerts) == 0 {
-		cm.logger.Info("all certificates are valid and not close to expiration", "size", size)
+		cm.logger.Infow("all certificates are valid and not close to expiration", "size", size)
 		return nil
 	}
 	return cm.notify(alerts)
@@ -103,7 +103,7 @@ func (cm *CertificateMonitor) CheckCertificates() error {
 
 func (cm *CertificateMonitor) notify(b []alert.Alert) error {
 	for _, a := range b {
-		cm.logger.Info("sending notification for alert",
+		cm.logger.Infow("sending notification for alert",
 			"message", a.Message,
 			"objectRef", a.ObjectRef,
 			"level", a.Level,

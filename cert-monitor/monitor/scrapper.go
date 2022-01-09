@@ -47,7 +47,7 @@ func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error
 		name, ns := extractNameAndNamespace(metric.GetLabel())
 		expiration := int64(math.Round(metric.GetGauge().GetValue())) * 1e9
 		if name == "" || ns == "" {
-			ps.logger.Warn("found certificate with empty name or namespace",
+			ps.logger.Warnw("found certificate with empty name or namespace",
 				"name", name,
 				"namespace", ns,
 				"expiration", expiration)
@@ -62,7 +62,7 @@ func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error
 }
 
 func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, error) {
-	ps.logger.Debug("calling metrics endpoint", "endpoint", ps.endpoint)
+	ps.logger.Debugw("calling metrics endpoint", "endpoint", ps.endpoint)
 	resp, err := ps.httpClient.Get(ps.endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error making HTTP request to: %s", err)
@@ -86,7 +86,7 @@ func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, erro
 			return nil, fmt.Errorf("error getting processing metrics for %s: %s",
 				ps.endpoint, err)
 		}
-		ps.logger.Debug("reading metric family", "name", metric.GetName())
+		ps.logger.Debugw("reading metric family", "name", metric.GetName())
 		if metric.GetName() == ps.metricName {
 			certificateInfoMetricFamily = &metric
 		}

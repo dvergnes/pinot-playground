@@ -30,7 +30,7 @@ func main() {
 
 	suggaredLogger := logger.Sugar()
 
-	suggaredLogger.Info("starting certificate monitor", "version", version.Version)
+	suggaredLogger.Infow("starting certificate monitor", "version", version.Version)
 
 	// 1. read config
 	config := monitor.Config{}
