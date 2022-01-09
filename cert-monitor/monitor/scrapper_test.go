@@ -9,6 +9,7 @@ import (
 	"github.com/dvergnes/pinot-playground/cert-monitor/monitor"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"go.uber.org/zap"
 )
 
 var _ = Describe("PrometheusScrapper", func() {
@@ -16,7 +17,10 @@ var _ = Describe("PrometheusScrapper", func() {
 		endpoint   = "http://localhost:8080/metrics"
 		metricName = "certmanager_certificate_expiration_timestamp_seconds"
 	)
-	var scrapper monitor.CertificateInfoGatherer
+	var (
+		scrapper monitor.CertificateInfoGatherer
+		logger   = zap.S()
+	)
 
 	Describe("GatherCertificateInfos", func() {
 
@@ -60,7 +64,7 @@ certmanager_certificate_ready_status{condition="Unknown",name="vergnes-com",name
 						},
 					}, nil
 				})
-				scrapper = monitor.NewPrometheusCertificateInfosGatherer(client, endpoint, metricName)
+				scrapper = monitor.NewPrometheusCertificateInfosGatherer(logger, client, endpoint, metricName)
 			})
 
 			It("should read the cerificate info from the metrics", func() {
@@ -94,7 +98,7 @@ certmanager_certificate_ready_status{condition="Unknown",name="vergnes-com",name
 					Expect(req.URL.String()).Should(Equal(endpoint))
 					return nil, criticalError
 				})
-				scrapper = monitor.NewPrometheusCertificateInfosGatherer(client, endpoint, metricName)
+				scrapper = monitor.NewPrometheusCertificateInfosGatherer(logger, client, endpoint, metricName)
 			})
 
 			It("should propagate the error", func() {
@@ -112,7 +116,7 @@ certmanager_certificate_ready_status{condition="Unknown",name="vergnes-com",name
 						StatusCode: http.StatusInternalServerError,
 					}, nil
 				})
-				scrapper = monitor.NewPrometheusCertificateInfosGatherer(client, endpoint, metricName)
+				scrapper = monitor.NewPrometheusCertificateInfosGatherer(logger, client, endpoint, metricName)
 			})
 
 			It("should propagate the error", func() {
@@ -130,7 +134,7 @@ certmanager_certificate_ready_status{condition="Unknown",name="vergnes-com",name
 						Body:       ioutil.NopCloser(bytes.NewBufferString("invalid payload\n")),
 					}, nil
 				})
-				scrapper = monitor.NewPrometheusCertificateInfosGatherer(client, endpoint, metricName)
+				scrapper = monitor.NewPrometheusCertificateInfosGatherer(logger, client, endpoint, metricName)
 			})
 			It("should propagate the error", func() {
 				Expect(err).Should(MatchError("error getting processing metrics for http://localhost:8080/metrics: text format parsing error in line 1: expected float as value, got \"payload\""))

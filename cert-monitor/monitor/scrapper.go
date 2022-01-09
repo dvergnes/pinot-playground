@@ -8,14 +8,16 @@ import (
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
+	"go.uber.org/zap"
 )
 
 // NewPrometheusCertificateInfosGatherer creates a CertificateInfoGatherer by scrapping Prometheus metrics
-func NewPrometheusCertificateInfosGatherer(client *http.Client, endpoint, metricName string) CertificateInfoGatherer {
+func NewPrometheusCertificateInfosGatherer(logger *zap.SugaredLogger, client *http.Client, endpoint, metricName string) CertificateInfoGatherer {
 	return &PrometheusScrapper{
 		endpoint:   endpoint,
 		metricName: metricName,
 		httpClient: client,
+		logger:     logger,
 	}
 }
 
@@ -25,6 +27,7 @@ type PrometheusScrapper struct {
 	metricName string
 
 	httpClient *http.Client
+	logger     *zap.SugaredLogger
 }
 
 // GatherCertificateInfos implements CertificateInfoGatherer contract
@@ -47,6 +50,7 @@ func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error
 }
 
 func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, error) {
+	ps.logger.Debug("calling metrics endpoint", "endpoint", ps.endpoint)
 	resp, err := ps.httpClient.Get(ps.endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error making HTTP request to: %s", err)
@@ -70,6 +74,7 @@ func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, erro
 			return nil, fmt.Errorf("error getting processing metrics for %s: %s",
 				ps.endpoint, err)
 		}
+		ps.logger.Debug("reading metric family", "name", metric.GetName())
 		if metric.GetName() == ps.metricName {
 			certificateInfoMetricFamily = &metric
 		}
