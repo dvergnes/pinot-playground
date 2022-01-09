@@ -36,6 +36,9 @@ func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error
 	if err != nil {
 		return nil, err
 	}
+	if metrics == nil {
+		return nil, nil
+	}
 	var certs []CertificateInfo
 	for _, metric := range metrics.GetMetric() {
 		// TODO, check on type

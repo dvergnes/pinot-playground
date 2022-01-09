@@ -141,6 +141,22 @@ certmanager_certificate_ready_status{condition="Unknown",name="vergnes-com",name
 			})
 		})
 
+		When("metrics cannot be found", func() {
+			BeforeEach(func() {
+				client := NewTestClient(func(req *http.Request) (*http.Response, error) {
+					// Test request parameters
+					Expect(req.URL.String()).Should(Equal(endpoint))
+					return &http.Response{
+						StatusCode: http.StatusOK,
+						Body:       ioutil.NopCloser(bytes.NewBufferString("\n")),
+					}, nil
+				})
+				scrapper = monitor.NewPrometheusCertificateInfosGatherer(logger, client, endpoint, metricName)
+			})
+			It("should return an empty slice", func() {
+				Expect(certs).Should(BeEmpty())
+			})
+		})
 	})
 })
 
