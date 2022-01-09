@@ -45,10 +45,17 @@ func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error
 	var certs []CertificateInfo
 	for _, metric := range metrics.GetMetric() {
 		name, ns := extractNameAndNamespace(metric.GetLabel())
+		expiration := int64(math.Round(metric.GetGauge().GetValue())) * 1e9
+		if name == "" || ns == "" {
+			ps.logger.Warn("found certificate with empty name or namespace",
+				"name", name,
+				"namespace", ns,
+				"expiration", expiration)
+		}
 		certs = append(certs, CertificateInfo{
 			Name:       name,
 			Namespace:  ns,
-			Expiration: int64(math.Round(metric.GetGauge().GetValue()))*1e9,
+			Expiration: expiration,
 		})
 	}
 	return certs, nil
@@ -87,8 +94,6 @@ func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, erro
 
 	return certificateInfoMetricFamily, nil
 }
-
-
 
 func extractNameAndNamespace(pairs []*dto.LabelPair) (name string, ns string) {
 	for _, pair := range pairs {
