@@ -42,6 +42,7 @@ func NewCertificateMonitor(logger *zap.SugaredLogger, gatherer CertificateInfoGa
 		threshold:               threshold.Nanoseconds(),
 		certificateInfoGatherer: gatherer,
 		notifier:                notifier,
+		logger:                  logger,
 	}
 }
 
@@ -53,6 +54,8 @@ type CertificateMonitor struct {
 	clock                   Clock
 	certificateInfoGatherer CertificateInfoGatherer
 	notifier                alert.Notifier
+
+	logger *zap.SugaredLogger
 }
 
 func (cm *CertificateMonitor) CheckCertificates() error {
@@ -61,6 +64,8 @@ func (cm *CertificateMonitor) CheckCertificates() error {
 		return fmt.Errorf("failed to gather certificate information: %s", err)
 	}
 
+	size := len(certInfos)
+	cm.logger.Info("verifying certificates", "size", size)
 	var alerts []alert.Alert
 	for _, cert := range certInfos {
 		now := cm.clock.Now()
@@ -89,17 +94,26 @@ func (cm *CertificateMonitor) CheckCertificates() error {
 			})
 		}
 	}
-
+	if len(alerts) == 0 {
+		cm.logger.Info("all certificates are valid and not close to expiration", "size", size)
+		return nil
+	}
 	return cm.notify(alerts)
 }
 
 func (cm *CertificateMonitor) notify(b []alert.Alert) error {
 	for _, a := range b {
+		cm.logger.Info("sending notification for alert",
+			"message", a.Message,
+			"objectRef", a.ObjectRef,
+			"level", a.Level,
+		)
 		if err := cm.notifier.Send(a); err != nil {
-			return fmt.Errorf("failed to send a for certificate %s.%s: %s",
+			return fmt.Errorf("failed to send an alert for certificate %s.%s: %s",
 				a.ObjectRef.Namespace, a.ObjectRef.Name,
 				err)
 		}
 	}
+
 	return nil
 }

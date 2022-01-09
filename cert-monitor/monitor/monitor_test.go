@@ -138,7 +138,7 @@ var _ = Describe("Monitor", func() {
 				notifierMock.On("Send", mock.Anything).Return(criticalErr)
 			})
 			It("should propagate the error", func() {
-				Expect(err).Should(MatchError("failed to send a for certificate ns.cert-name: failed to connect to SMTP server"))
+				Expect(err).Should(MatchError("failed to send an alert for certificate ns.cert-name: failed to connect to SMTP server"))
 			})
 		})
 
