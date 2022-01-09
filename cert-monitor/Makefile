@@ -1,6 +1,6 @@
 
 # Build info
-BUILD_INFO_IMPORT_PATH=github.com/dvergnes/pino-playground/cert-monitor/internal/version
+BUILD_INFO_IMPORT_PATH=github.com/dvergnes/pinot-playground/cert-monitor/internal/version
 VERSION=$(shell git describe --always --match "v[0-9]*" HEAD)
 BUILD_INFO=-ldflags "-X $(BUILD_INFO_IMPORT_PATH).Version=$(VERSION)"
 GOOS=$(shell go env GOOS)
