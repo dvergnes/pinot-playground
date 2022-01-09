@@ -4,18 +4,18 @@ import "go.uber.org/zap"
 
 // NewLogNotifier returns a Notifier that generate logs using the passed logger
 func NewLogNotifier(logger *zap.SugaredLogger) Notifier {
-	return &LogNotifier{
+	return &logNotifier{
 		logger: logger,
 	}
 }
 
-// LogNotifier generates logs when asked to send an alert
-type LogNotifier struct {
+// logNotifier generates logs when asked to send an alert
+type logNotifier struct {
 	logger *zap.SugaredLogger
 }
 
 // Send implements Notifier contract
-func (l *LogNotifier) Send(alert Alert) error {
+func (l *logNotifier) Send(alert Alert) error {
 	switch alert.Level {
 	case Info:
 		l.logger.Infow("processing notification",
