@@ -39,9 +39,11 @@ func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error
 	if metrics == nil {
 		return nil, nil
 	}
+	if metrics.GetType() != dto.MetricType_GAUGE {
+		return nil, fmt.Errorf("metric family %s is a %s and not a GAUGE", ps.metricName, metrics.GetType().String())
+	}
 	var certs []CertificateInfo
 	for _, metric := range metrics.GetMetric() {
-		// TODO, check on type
 		name, ns := extractNameAndNamespace(metric.GetLabel())
 		certs = append(certs, CertificateInfo{
 			Name:       name,

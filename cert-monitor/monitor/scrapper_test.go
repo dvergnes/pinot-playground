@@ -157,6 +157,28 @@ certmanager_certificate_ready_status{condition="Unknown",name="vergnes-com",name
 				Expect(certs).Should(BeEmpty())
 			})
 		})
+
+		When("metrics has an unexpected type", func() {
+			BeforeEach(func() {
+				client := NewTestClient(func(req *http.Request) (*http.Response, error) {
+					// Test request parameters
+					Expect(req.URL.String()).Should(Equal(endpoint))
+					return &http.Response{
+						StatusCode: http.StatusOK,
+						Body:       ioutil.NopCloser(bytes.NewBufferString(`# HELP certmanager_certificate_expiration_timestamp_seconds The date after which the certificate expires. Expressed as a Unix Epoch Time.
+# TYPE certmanager_certificate_expiration_timestamp_seconds counter
+certmanager_certificate_expiration_timestamp_seconds{name="example-com",namespace="sandbox"} 1.649444639e+09
+`)),
+					}, nil
+				})
+				scrapper = monitor.NewPrometheusCertificateInfosGatherer(logger, client, endpoint, metricName)
+			})
+			It("should return an error", func() {
+				Expect(certs).Should(BeEmpty())
+				Expect(err).Should(MatchError("metric family certmanager_certificate_expiration_timestamp_seconds is a COUNTER and not a GAUGE"))
+			})
+		})
+
 	})
 })
 
