@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-monitor-config
+data:
+  config.yml: |
+    threshold: 1m
+    scrapping:
+      endpoint: http://cert-manager.cert-manager.svc.cluster.local:9402/metrics
+      metric: certmanager_certificate_expiration_timestamp_seconds
+      timeout: 10s

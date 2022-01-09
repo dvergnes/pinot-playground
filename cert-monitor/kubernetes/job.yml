@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cert-monitor
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: cert-monitor
+              image: cert-monitor:latest
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+              volumeMounts:
+                - name: config
+                  mountPath: "/config"
+                  readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+            - name: config
+              configMap:
+                # Provide the name of the ConfigMap you want to mount.
+                name: cert-monitor-config
