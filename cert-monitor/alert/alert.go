@@ -15,16 +15,16 @@ const (
 )
 
 
-func (l Level) MarshalJSON() ([]byte, error) {
+func (l Level) String() string {
 	switch l {
 	case Info:
-		return []byte("INFO"), nil
+		return "INFO"
 	case Warn:
-		return []byte("WARN"), nil
+		return "WARN"
 	case Error:
-		return []byte("ERROR"), nil
+		return "ERROR"
 	default:
-		return []byte("UNKNOWN"), nil
+		return "UNKNOWN"
 	}
 }
 
