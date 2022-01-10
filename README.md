@@ -48,6 +48,16 @@ kubectl -n cert-manager get all
 
 For more details, go to https://cert-manager.io/docs/installation/
 
+To create Issuers
+```shell
+kubectl apply -f cert-manager/kubernetes/issuers.yml
+```
+
+To create a certificate
+```shell
+kubectl apply -f cert-manager/kubernetes/certificate.yml
+```
+
 ### Cert-monitor
 This section is related to the cert-monitor that will list all certificate CRD to verify their expiration.
 The cert-monitor is deployed as a k8s cron job that runs every minute.
