@@ -85,4 +85,6 @@ type Alert struct {
 type Notifier interface {
 	// Send sends the alert to the external system
 	Send(alert Alert) error
+	// Close closes the notifier
+	Close() error
 }

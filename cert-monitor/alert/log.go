@@ -14,6 +14,11 @@ type logNotifier struct {
 	logger *zap.SugaredLogger
 }
 
+// Close implements Notifier contract
+func (l *logNotifier) Close() error {
+	return nil
+}
+
 // Send implements Notifier contract
 func (l *logNotifier) Send(alert Alert) error {
 	switch alert.Level {

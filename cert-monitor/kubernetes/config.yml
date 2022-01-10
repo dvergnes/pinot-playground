@@ -5,8 +5,13 @@ metadata:
   name: cert-monitor-config
 data:
   config.yml: |
-    threshold: 1m
-    gatherer:
-      page_size: 100
-      timeout: 10s
+    monitor:
+      threshold: 1m
+      gatherer:
+        page_size: 100
+        timeout: 10s
+    notifier:
+      brokers:
+        - kafka-headless.pinot-quickstart:9092
+      topic: cert-monitor-alerts
 ...

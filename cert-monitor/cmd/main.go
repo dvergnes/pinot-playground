@@ -10,9 +10,11 @@ import (
 	"time"
 
 	"github.com/dvergnes/pinot-playground/cert-monitor/alert"
+	"github.com/dvergnes/pinot-playground/cert-monitor/config"
 	"github.com/dvergnes/pinot-playground/cert-monitor/internal/version"
 	"github.com/dvergnes/pinot-playground/cert-monitor/monitor"
 
+	"github.com/Shopify/sarama"
 	certmanager "github.com/jetstack/cert-manager/pkg/client/clientset/versioned"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -53,14 +55,19 @@ func main() {
 	gatherer := monitor.NewKubernetesCertificateInfoGatherer(
 		suggaredLogger.Named("k8sCertInfoGatherer"),
 		clientSet,
-		config.GathererConfig)
-	notifier := alert.NewLogNotifier(suggaredLogger.Named("logNotifier"))
+		config.Monitor.GathererConfig)
+	//notifier := alert.NewLogNotifier(suggaredLogger.Named("logNotifier"))
+	producer,err := sarama.NewSyncProducer(config.Notifier.Brokers, nil)
+	if err!=nil {
+		suggaredLogger.Fatalw("failed to create kafka producer", "error", err)
+	}
+	notifier := alert.NewKafkaNotifier(config.Notifier.Topic, producer)
 	certMonitor := monitor.NewCertificateMonitor(
 		suggaredLogger.Named("monitor"),
 		gatherer,
 		notifier,
 		sysClock,
-		config.Threshold)
+		config.Monitor.Threshold)
 	// 3. run the monitor
 	if err := certMonitor.CheckCertificates(context.Background()); err != nil {
 		suggaredLogger.Fatalw("failed to verify certificate", "error", err)
@@ -68,8 +75,8 @@ func main() {
 
 }
 
-func newFromBytes(data []byte) (*monitor.Config, error) {
-	config := monitor.Config{}
+func newFromBytes(data []byte) (*config.Config, error) {
+	config := config.Config{}
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config data: %s", err)
 	}
@@ -78,7 +85,7 @@ func newFromBytes(data []byte) (*monitor.Config, error) {
 	return &config, nil
 }
 
-func newFromFile(filepath string) (*monitor.Config, error) {
+func newFromFile(filepath string) (*config.Config, error) {
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %s", err)
@@ -86,7 +93,7 @@ func newFromFile(filepath string) (*monitor.Config, error) {
 	return newFromBytes(data)
 }
 
-func newFromCLI(logger *zap.SugaredLogger) (*monitor.Config, *rest.Config, error) {
+func newFromCLI(logger *zap.SugaredLogger) (*config.Config, *rest.Config, error) {
 	configPath := flag.String("config", "", "Configuration file path")
 	kubeConfigPath := flag.String("kubeconfig", "", "Kubectl configuration file path")
 	flag.Parse()
