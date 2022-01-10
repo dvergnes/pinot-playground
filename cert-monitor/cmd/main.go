@@ -6,8 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"time"
 
@@ -18,6 +16,8 @@ import (
 	certmanager "github.com/jetstack/cert-manager/pkg/client/clientset/versioned"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 var sysClock = &systemClock{}
@@ -46,12 +46,6 @@ func main() {
 		suggaredLogger.Fatalw("failed to initialize application", "error", err)
 	}
 	// 2. init app
-	//gatherer := monitor.NewPrometheusCertificateInfosGatherer(
-	//	suggaredLogger.Named("certInfoGatherer"),
-	//	httpClient,
-	//	config.Scrapping.Endpoint,
-	//	config.Scrapping.Metric)
-
 	clientSet, err := certmanager.NewForConfig(k8sCfg)
 	if err != nil {
 		suggaredLogger.Fatalw("failed to create k8s client", "error", err)
