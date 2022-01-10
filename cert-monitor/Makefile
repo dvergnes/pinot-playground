@@ -19,10 +19,10 @@ gomoddownload:
 
 .PHONY: install-tools
 install-tools:
-	go get github.com/vektra/mockery/v2/.../
+	brew install mockery
 
 .PHONY: generate-mock
-generate-mock:
+generate-mock: install-tools
 	mockery --case underscore --dir alert --name Notifier
 	mockery --case underscore --dir monitor --name CertificateInfoGatherer
 	mockery --case underscore --dir monitor --name Clock
@@ -39,3 +39,7 @@ cert-monitor-linux_amd64:
 .PHONY: cert-monitor-darwin_amd64
 cert-monitor-darwin_amd64:
 	GOOS=darwin   GOARCH=amd64 $(MAKE) cert-monitor
+
+.PHONY: docker
+docker: cert-monitor-linux_amd64
+	docker build -t cert-monitor:latest .
