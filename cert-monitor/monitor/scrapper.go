@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"math"
@@ -13,7 +14,7 @@ import (
 
 // NewPrometheusCertificateInfosGatherer creates a CertificateInfoGatherer by scrapping Prometheus metrics
 func NewPrometheusCertificateInfosGatherer(logger *zap.SugaredLogger, client *http.Client, endpoint, metricName string) CertificateInfoGatherer {
-	return &PrometheusScrapper{
+	return &prometheusScrapper{
 		endpoint:   endpoint,
 		metricName: metricName,
 		httpClient: client,
@@ -21,8 +22,8 @@ func NewPrometheusCertificateInfosGatherer(logger *zap.SugaredLogger, client *ht
 	}
 }
 
-// PrometheusScrapper implements CertificateInfoGatherer by scrapping the cert-manager metrics prometheus endpoint
-type PrometheusScrapper struct {
+// prometheusScrapper implements CertificateInfoGatherer by scrapping the cert-manager metrics prometheus endpoint
+type prometheusScrapper struct {
 	endpoint   string
 	metricName string
 
@@ -31,7 +32,7 @@ type PrometheusScrapper struct {
 }
 
 // GatherCertificateInfos implements CertificateInfoGatherer contract
-func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error) {
+func (ps *prometheusScrapper) GatherCertificateInfos(context.Context) ([]CertificateInfo, error) {
 	metrics, err := ps.scrapCertificateMetrics()
 	if err != nil {
 		return nil, err
@@ -61,7 +62,7 @@ func (ps *PrometheusScrapper) GatherCertificateInfos() ([]CertificateInfo, error
 	return certs, nil
 }
 
-func (ps *PrometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, error) {
+func (ps *prometheusScrapper) scrapCertificateMetrics() (*dto.MetricFamily, error) {
 	ps.logger.Debugw("calling metrics endpoint", "endpoint", ps.endpoint)
 	resp, err := ps.httpClient.Get(ps.endpoint)
 	if err != nil {

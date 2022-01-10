@@ -1,3 +1,4 @@
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -19,8 +20,10 @@ spec:
                   mountPath: "/config"
                   readOnly: true
           restartPolicy: OnFailure
+          serviceAccountName: cert-monitor
           volumes:
             - name: config
               configMap:
                 # Provide the name of the ConfigMap you want to mount.
                 name: cert-monitor-config
+...

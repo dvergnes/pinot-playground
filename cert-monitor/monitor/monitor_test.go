@@ -40,7 +40,7 @@ var _ = Describe("Monitor", func() {
 	Describe("CheckCertificates", func() {
 		var err error
 		JustBeforeEach(func() {
-			err = m.CheckCertificates()
+			err = m.CheckCertificates(nil)
 		})
 		When("no certificates defined in the system", func() {
 			BeforeEach(func() {

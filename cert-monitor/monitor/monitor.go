@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -22,7 +23,7 @@ type CertificateInfo struct {
 
 // CertificateInfoGatherer collects information about the certificates defined in k8s
 type CertificateInfoGatherer interface {
-	GatherCertificateInfos() ([]CertificateInfo, error)
+	GatherCertificateInfos(ctx context.Context) ([]CertificateInfo, error)
 }
 
 // TODO:doc
@@ -58,8 +59,8 @@ type CertificateMonitor struct {
 	logger *zap.SugaredLogger
 }
 
-func (cm *CertificateMonitor) CheckCertificates() error {
-	certInfos, err := cm.certificateInfoGatherer.GatherCertificateInfos()
+func (cm *CertificateMonitor) CheckCertificates(ctx context.Context) error {
+	certInfos, err := cm.certificateInfoGatherer.GatherCertificateInfos(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to gather certificate information: %w", err)
 	}

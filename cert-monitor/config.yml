@@ -3,3 +3,6 @@ scrapping:
   endpoint: http://localhost:9402/metrics
   metric: certmanager_certificate_expiration_timestamp_seconds
   timeout: 10s
+gatherer:
+  page_size: 100
+  timeout: 10s

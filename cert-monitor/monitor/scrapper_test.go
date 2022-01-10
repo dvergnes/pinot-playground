@@ -31,7 +31,7 @@ var _ = Describe("PrometheusScrapper", func() {
 		)
 
 		JustBeforeEach(func() {
-			certs, err = scrapper.GatherCertificateInfos()
+			certs, err = scrapper.GatherCertificateInfos(nil)
 		})
 
 		When("metrics can be collected", func() {
