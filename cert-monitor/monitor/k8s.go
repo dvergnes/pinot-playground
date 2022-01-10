@@ -3,9 +3,9 @@ package monitor
 import (
 	"context"
 	"fmt"
-	"go.uber.org/zap"
 
 	certmanager "github.com/jetstack/cert-manager/pkg/client/clientset/versioned"
+	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
