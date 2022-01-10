@@ -26,6 +26,9 @@ generate-mock: install-tools
 	mockery --case underscore --dir alert --name Notifier
 	mockery --case underscore --dir monitor --name CertificateInfoGatherer
 	mockery --case underscore --dir monitor --name Clock
+	mockery --case underscore --name Interface --srcpkg github.com/jetstack/cert-manager/pkg/client/clientset/versioned
+	mockery --case underscore --name CertmanagerV1Interface --srcpkg github.com/jetstack/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1
+	mockery --case underscore --name CertificateInterface --srcpkg github.com/jetstack/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1
 
 .PHONY: cert-monitor
 cert-monitor:
