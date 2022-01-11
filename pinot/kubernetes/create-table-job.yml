@@ -1,0 +1,124 @@
+# Copyright (c) 2022 Denis Vergnes
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: certs-alerts
+  namespace: pinot-quickstart
+data:
+  certsAlerts_realtime_table_config.json: |-
+    {
+      "tableName": "certsAlerts",
+      "tableType": "REALTIME",
+      "segmentsConfig": {
+        "timeColumnName": "when",
+        "timeType": "NANOSECONDS",
+        "retentionTimeUnit": "DAYS",
+        "retentionTimeValue": "10",
+        "segmentPushType": "APPEND",
+        "segmentAssignmentStrategy": "BalanceNumSegmentAssignmentStrategy",
+        "schemaName": "certsAlerts",
+        "replication": "1",
+        "replicasPerPartition": "1"
+      },
+      "tenants": {},
+      "tableIndexConfig": {
+        "loadMode": "MMAP",
+        "streamConfigs": {
+          "streamType": "kafka",
+          "stream.kafka.consumer.type": "simple",
+          "stream.kafka.topic.name": "cert-monitor-alerts",
+          "stream.kafka.decoder.class.name": "org.apache.pinot.plugin.stream.kafka.KafkaJSONMessageDecoder",
+          "stream.kafka.consumer.factory.class.name": "org.apache.pinot.plugin.stream.kafka20.KafkaConsumerFactory",
+          "stream.kafka.hlc.zk.connect.string": "kafka-zookeeper:2181",
+          "stream.kafka.zk.broker.url": "kafka-zookeeper:2181",
+          "stream.kafka.broker.list": "kafka:9092",
+          "realtime.segment.flush.threshold.time": "3600000",
+          "realtime.segment.flush.threshold.size": "50000",
+          "stream.kafka.consumer.prop.auto.offset.reset": "smallest"
+        }
+      },
+      "metadata": {
+        "customConfigs": {}
+      }
+    }
+
+  certsAlerts_schema.json: |-
+    {
+    "metricFieldSpecs": [
+    ],
+    "dimensionFieldSpecs": [
+      {
+        "dataType": "STRING",
+        "name": "level"
+      },
+      {
+        "dataType": "STRING",
+        "name": "message"
+      },
+      {
+        "dataType": "STRING",
+        "name": "source"
+      },
+      {
+        "dataType": "STRING",
+        "name": "objectRef.name"
+      },
+      {
+        "dataType": "STRING",
+        "name": "objectRef.namespace"
+      }
+    ],
+    "dateTimeFieldSpecs": [
+      {
+        "name": "when",
+        "dataType": "LONG",
+        "format": "1:NANOSECONDS:EPOCH",
+        "granularity": "1:MINUTES"
+      }
+    ],
+    "schemaName": "certsAlerts"
+    }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pinot-realtime-quickstart-pinot-table-creation
+  namespace: pinot-quickstart
+spec:
+  template:
+    spec:
+      containers:
+        - name: pinot-add-certs-alerts-realtime-table-json
+          image: apachepinot/pinot:20220110
+          args: [ "AddTable", "-schemaFile", "/var/pinot/examples/certsAlerts_schema.json", "-tableConfigFile", "/var/pinot/examples/certsAlerts_realtime_table_config.json", "-controllerHost", "pinot-controller", "-controllerPort", "9000", "-exec" ]
+          env:
+            - name: JAVA_OPTS
+              value: "-Xms4G -Xmx4G -Dpinot.admin.system.exit=true"
+          volumeMounts:
+            - name: certs-alerts
+              mountPath: /var/pinot/examples
+      restartPolicy: OnFailure
+      volumes:
+        - name: certs-alerts
+          configMap:
+            name: certs-alerts
+  backoffLimit: 100
+...
